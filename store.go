@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// Store represents a map of string keys and []byte values. In this case, the
+// key is the configuration name and the value is the related config.
 type Store struct {
 	kb map[string][]byte
 }
@@ -76,10 +78,14 @@ func (s *Store) Get(key string, config interface{}) error {
 	return fmt.Errorf("%s %w", key, ErrKeyNotFound)
 }
 
+// cfgData represents a byte slice where we store information about a specific
+// configuration.
 type cfgData struct {
 	b []byte
 }
 
+// UnmarshalJSON sets the cfgData to the specified byte slice, returning nil
+// if no error occurs.
 func (d *cfgData) UnmarshalJSON(b []byte) error {
 	d.b = b
 
