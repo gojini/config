@@ -1,0 +1,9 @@
+{
+    "log": 
+    {
+        "file": "example.log"
+    },
+    "server": {
+        "port": 8088
+    }
+}
