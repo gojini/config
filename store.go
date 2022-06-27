@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -54,6 +55,18 @@ func (s *Store) Load(ctx context.Context, src io.Reader) error {
 // LoadFromStr loads configuration from a string.
 func (s *Store) LoadFromStr(ctx context.Context, cfg string) error {
 	return s.Load(ctx, strings.NewReader(cfg))
+}
+
+// LoadFromFile loads configuration from a file.
+func (s *Store) LoadFromFile(ctx context.Context, cfgFile string) error {
+	cfg, err := os.Open(cfgFile)
+	if err != nil {
+		return fmt.Errorf("cannot open file: %w", err)
+	}
+
+	defer cfg.Close()
+
+	return s.Load(ctx, cfg)
 }
 
 // Get retrieves the config specified by the key if exists. If the config

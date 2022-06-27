@@ -9,15 +9,7 @@ import (
 	"gojini.dev/config"
 )
 
-func TestStore(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	store := config.New()
-	cfgStr := `{"log": {"file": "example.log"}, "server": {"port": 8088}}`
-
-	assert.Nil(store.LoadFromStr(context.Background(), cfgStr))
-
+func testConfig(assert *assert.Assertions, store *config.Store) {
 	l := &struct {
 		File string `json:"file"`
 	}{File: "default.log"}
@@ -35,6 +27,18 @@ func TestStore(t *testing.T) {
 	assert.Nil(store.Get("server", s))
 	assert.Equal(s.Port, 8088)
 	assert.NotNil(store.Get("blah", l))
+}
+
+func TestStore(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	store := config.New()
+	cfgStr := `{"log": {"file": "example.log"}, "server": {"port": 8088}}`
+
+	assert.Nil(store.LoadFromStr(context.Background(), cfgStr))
+
+	testConfig(assert, store)
 
 	j := 0
 	assert.Nil(store.LoadFromStr(context.Background(), `{"log": "hello"}`))
@@ -52,11 +56,25 @@ func TestBadJsonStore(t *testing.T) {
 	assert.NotNil(store.Load(context.Background(), badReader{}))
 }
 
-type badReader struct {
-}
+type badReader struct{}
 
 var brErr = errors.New("br error")
 
 func (br badReader) Read([]byte) (int, error) {
 	return 0, brErr
+}
+
+func TestFileStore(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	store := config.New()
+	assert.NotNil(store)
+
+	assert.NotNil(store.LoadFromFile(context.Background(), "someRandomFile"))
+
+	assert.Nil(store.LoadFromFile(context.Background(), "test.json"))
+
+	testConfig(assert, store)
 }
